@@ -11,10 +11,16 @@ object AppEventBus {
     private val _events = MutableSharedFlow<Any>()
     val events = _events.asSharedFlow()
 
+    /**
+     * publish
+     */
     suspend fun publish(event: Any) {
         _events.emit(event)
     }
 
+    /**
+     * subscribe the event
+     */
     suspend inline fun <reified T> subscribe(crossinline onEvent: (T) -> Unit) {
         events.filterIsInstance<T>()
             .collectLatest { event ->

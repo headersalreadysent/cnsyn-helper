@@ -87,13 +87,30 @@ open class AppSharedSettings(context: Context) {
         publish(key, null)
     }
 
-    // Remove a setting
+    /**
+     * purge all settings
+     */
     open fun purge(key: String) {
         sharedPreferences.all.forEach {
             if (it.key.contains(key)) {
                 remove(it.key)
             }
         }
+    }
+
+    /**
+     * get all keys
+     */
+    fun keys(): List<String> {
+        return sharedPreferences.all.keys.toList()
+    }
+
+    /**
+     * get all values
+     */
+    fun all(): Map<String, Any> {
+        return sharedPreferences.all.filterValues { it != null }
+            .toMap() as Map<String, Any> //we clear null ones. dont worry
     }
 
     // Clear all settings
