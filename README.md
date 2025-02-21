@@ -1,4 +1,4 @@
-# android-example
+# cnsyn-helper
 
 [![Release](https://jitpack.io/v/jitpack/android-example.svg)](https://jitpack.io/#jitpack/android-example)
 
@@ -22,7 +22,7 @@ and:
 
 ```gradle
 dependencies {
-    compile 'com.github.jitpack:android-example:{latest version}'
+    compile 'com.github.headersalreadysent:cnsyn-helper:{latest version}'
 }
 ```
 

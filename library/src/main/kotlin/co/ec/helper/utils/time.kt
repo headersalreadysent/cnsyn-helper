@@ -38,7 +38,7 @@ fun Long.timeString(): String {
 /**
  * format time as lapse
  */
-fun Int.formatTime(): String {
+fun Long.formatTime(): String {
     val days = this / 86400
     val hours = (this - (days * 86400)) / 3600
     val minutes = (this % 3600) / 60

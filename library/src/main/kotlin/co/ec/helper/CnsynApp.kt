@@ -2,12 +2,13 @@ package co.ec.helper
 
 import android.app.Application
 import android.content.Context
+import co.ec.helper.helpers.ExceptionHelper
 
-open class App : Application() {
+open class CnsynApp : Application() {
 
     companion object {
 
-        private lateinit var instance: App
+        private lateinit var instance: CnsynApp
 
         fun context(): Context {
             return instance.applicationContext
@@ -22,8 +23,9 @@ open class App : Application() {
     override fun onCreate() {
         super.onCreate()
         instance = this
-        Thread.setDefaultUncaughtExceptionHandler(AppExceptionHandler(applicationContext))
-
+        Thread.setDefaultUncaughtExceptionHandler(ExceptionHelper(applicationContext))
     }
+
+
 
 }

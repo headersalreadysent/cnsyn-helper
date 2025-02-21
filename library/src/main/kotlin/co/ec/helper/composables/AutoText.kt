@@ -52,11 +52,12 @@ fun AutoText(
     softWrap: Boolean = true,
     maxLines: Int = 1,
     style: TextStyle = LocalTextStyle.current,
-    sizeDefined: (size:Int) -> Unit = {}
+    sizeDefined: (size: Int) -> Unit = {},
 ) {
     var fontSizeValue by remember { mutableIntStateOf(fontSize.max()) }
     var lineHeightValue by remember { mutableFloatStateOf(fontSize.max().toFloat() * 1.4F) }
     var readyToDraw by remember { mutableStateOf(false) }
+
 
     Text(
         text = text,
@@ -87,8 +88,8 @@ fun AutoText(
                 }
             } else {
                 // Text fits before reaching the minimum, it's readyToDraw
-                sizeDefined(fontSizeValue)
                 readyToDraw = true
+                sizeDefined(fontSizeValue)
             }
         },
         modifier = modifier.drawWithContent { if (readyToDraw) drawContent() }
@@ -97,7 +98,7 @@ fun AutoText(
 
 @Preview(showBackground = true)
 @Composable
-fun AutoTextPreview() {
+private fun AutoTextPreview() {
     Column(
         modifier = Modifier
             .fillMaxSize()

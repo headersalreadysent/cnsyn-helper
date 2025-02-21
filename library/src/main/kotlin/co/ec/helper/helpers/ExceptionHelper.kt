@@ -1,9 +1,9 @@
-package co.ec.helper
+package co.ec.helper.helpers
 
 import co.ec.helper.utils.dateString
 import co.ec.helper.utils.timeString
 import android.content.Context
-import android.util.Log
+import co.ec.helper.CnsynApp
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
@@ -16,7 +16,7 @@ import java.io.PrintWriter
 import java.io.StringWriter
 
 
-class AppExceptionHandler(private val context: Context) : Thread.UncaughtExceptionHandler {
+class ExceptionHelper(private val context: Context) : Thread.UncaughtExceptionHandler {
 
 
     private val defaultExceptionHandler = Thread.getDefaultUncaughtExceptionHandler()
@@ -24,16 +24,16 @@ class AppExceptionHandler(private val context: Context) : Thread.UncaughtExcepti
     @OptIn(DelicateCoroutinesApi::class)
     override fun uncaughtException(thread: Thread, throwable: Throwable) {
         // Log the exception
-        AppLogger.e("Uncaught exception in thread ${thread.name}", throwable, "exception")
+        LogHelper.e("Uncaught exception in thread ${thread.name}: ${throwable.message}", throwable )
 
         // Record the exception to a file
         recordExceptionToFile(throwable)
-        val settings = AppSharedSettings(context)
+        val settings = SettingsHelper(context)
 
         val restartCount = settings.getInt("appRestartAfterError", 0)
         if (restartCount < 3) {
             //try only 3 time
-            AppLogger.w("try to restart for $restartCount", "exception")
+            LogHelper.w("try to restart for $restartCount", "exception")
             GlobalScope.launch {
                 delay(2000L)
                 settings.putInt("appRestartAfterError", restartCount + 1)
@@ -47,7 +47,7 @@ class AppExceptionHandler(private val context: Context) : Thread.UncaughtExcepti
 
 
     companion object {
-        private const val APP_LOG_FILE = "app.log"
+        private const val APP_LOG_FILE = "application_log"
         private val CRASH_FILE = "crash_report_"
 
         /**
@@ -55,7 +55,7 @@ class AppExceptionHandler(private val context: Context) : Thread.UncaughtExcepti
          */
         fun recordExceptionToFile(throwable: Throwable) {
             val logDir = getLogDirectory()
-            val fileName = "${CRASH_FILE}${System.currentTimeMillis() / 1000L}"
+            val fileName = "$CRASH_FILE${System.currentTimeMillis() / 1000L}"
             val file = File(logDir, fileName)
             FileOutputStream(file).use { fos ->
                 PrintWriter(fos).use { writer ->
@@ -69,19 +69,19 @@ class AppExceptionHandler(private val context: Context) : Thread.UncaughtExcepti
 
         fun appendLog(message: String) {
             try {
-                val logFile = File(App.context().filesDir, APP_LOG_FILE)
+                val logFile = File(CnsynApp.context().filesDir, APP_LOG_FILE)
                 val writer = FileWriter(logFile, true)
                 writer.append(message)
                 writer.append("\n")
                 writer.flush()
                 writer.close()
             } catch (e: IOException) {
-                Log.e("DEFAULT_TAG", "Error writing log to file", e)
+                LogHelper.e("Error writing log to file: ${e.message}", e)
             }
         }
 
-        fun getLogDirectory(): File {
-            val logDir = File(App.context().filesDir, "crash")
+        private fun getLogDirectory(): File {
+            val logDir = File(CnsynApp.context().filesDir, "crash")
             if (!logDir.exists()) {
                 //if not exists make it valid
                 logDir.mkdirs()
@@ -89,6 +89,53 @@ class AppExceptionHandler(private val context: Context) : Thread.UncaughtExcepti
             return logDir
         }
 
+
+        /**
+         * read logs
+         */
+        fun readLogs(): List<String> {
+            val logFile = File(CnsynApp.context().filesDir, APP_LOG_FILE)
+            val maxFileSize = 1 * 1024 * 1024 // 1 MB
+
+            if (!logFile.exists()) return emptyList()
+            // Check if the file exceeds 1 MB and trim if necessary
+            if (logFile.length() > maxFileSize) {
+                trimLogFile(logFile)
+            }
+            // Read the file in reverse
+            val reversedLogs = mutableListOf<String>()
+            logFile.readLines().asReversed().forEach { line ->
+                reversedLogs.add(line)
+            }
+            return reversedLogs
+        }
+
+        /**
+         * trim log file to size
+         */
+        private fun trimLogFile(logFile: File) {
+            try {
+                val lines = logFile.readLines()
+                val halfSize = lines.size / 2
+                val remainingLines = lines.subList(halfSize, lines.size)
+                // Rewrite the file with the remaining lines
+                logFile.writeText(remainingLines.joinToString("\n"))
+            } catch (e: IOException) {
+                LogHelper.e("Error trimming log file: ${e.message}", e)
+            }
+        }
+
+        /**
+         * clear log file
+         */
+        fun clearLogs() {
+            val logFile = File(CnsynApp.context().filesDir, APP_LOG_FILE)
+            logFile.writeText("")
+        }
+
+        /**
+         * read crash logs
+         */
         fun readCrashLogs(): List<Pair<String, String>> {
             val logs = mutableMapOf<String, String>()
             val logDir = getLogDirectory()
@@ -117,46 +164,6 @@ class AppExceptionHandler(private val context: Context) : Thread.UncaughtExcepti
                     file.delete()
                 }
             }
-        }
-
-        /**
-         * read logs
-         */
-        fun readLogs(): List<String> {
-            val logFile = File(App.context().filesDir, APP_LOG_FILE)
-            val maxFileSize = 1 * 1024 * 1024 // 1 MB
-
-            if (!logFile.exists()) return emptyList()
-            // Check if the file exceeds 1 MB and trim if necessary
-            if (logFile.length() > maxFileSize) {
-                trimLogFile(logFile)
-            }
-            // Read the file in reverse
-            val reversedLogs = mutableListOf<String>()
-            logFile.readLines().asReversed().forEach { line ->
-                reversedLogs.add(line)
-            }
-            return reversedLogs
-        }
-
-        /**
-         * trim log file to size
-         */
-        private fun trimLogFile(logFile: File) {
-            try {
-                val lines = logFile.readLines()
-                val halfSize = lines.size / 2
-                val remainingLines = lines.subList(halfSize, lines.size)
-                // Rewrite the file with the remaining lines
-                logFile.writeText(remainingLines.joinToString("\n"))
-            } catch (e: IOException) {
-                Log.e("AppLogger", "Error trimming log file", e)
-            }
-        }
-
-        fun clearLogs() {
-            val logFile = File(App.context().filesDir, APP_LOG_FILE)
-            logFile.writeText("")
         }
 
     }

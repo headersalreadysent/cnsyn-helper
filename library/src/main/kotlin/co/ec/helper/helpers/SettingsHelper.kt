@@ -1,4 +1,4 @@
-package co.ec.helper
+package co.ec.helper.helpers
 
 import android.content.Context
 import android.content.SharedPreferences
@@ -6,7 +6,7 @@ import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
-open class AppSharedSettings(context: Context) {
+open class SettingsHelper(context: Context, preferencesName: String = "AppSettings") {
 
     /**
      * settings change event
@@ -14,13 +14,12 @@ open class AppSharedSettings(context: Context) {
     data class SettingsChange(var name: String, var value: Any? = null)
 
     private val sharedPreferences: SharedPreferences =
-        context.getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE)
+        context.getSharedPreferences(preferencesName, Context.MODE_PRIVATE)
 
     companion object {
-        private lateinit var instance: AppSharedSettings
-        private const val PREFERENCES_NAME = "AppSettings"
+        private lateinit var instance: SettingsHelper
 
-        fun get(): AppSharedSettings {
+        fun get(): SettingsHelper {
             return instance
         }
     }
@@ -33,7 +32,7 @@ open class AppSharedSettings(context: Context) {
     @OptIn(DelicateCoroutinesApi::class)
     private fun publish(key: String, value: Any?) {
         GlobalScope.launch {
-            AppEventBus.publish(SettingsChange(key, value))
+            EventBus.publish(SettingsChange(key, value))
         }
     }
 
@@ -108,9 +107,14 @@ open class AppSharedSettings(context: Context) {
     /**
      * get all values
      */
-    fun all(): Map<String, Any> {
-        return sharedPreferences.all.filterValues { it != null }
-            .toMap() as Map<String, Any> //we clear null ones. dont worry
+    fun all(): Map<String, Any?> {
+        val values= mutableMapOf<String,Any>()
+        sharedPreferences.all.forEach {
+            it.value?.let { value->
+                values[it.key]=value
+            }
+        }
+        return values
     }
 
     // Clear all settings

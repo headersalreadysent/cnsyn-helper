@@ -81,7 +81,7 @@ fun IconCard(
 
 @Composable
 @Preview
-fun IconCardPreview(){
+private fun IconCardPreview(){
     MaterialTheme {
         Box(modifier = Modifier.fillMaxWidth().aspectRatio(1F)){
             IconCard(icon = Icons.Filled.Done) {

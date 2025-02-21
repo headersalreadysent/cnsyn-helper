@@ -62,7 +62,7 @@ private fun getIconByName(name: String): ImageVector? {
 
 @Preview(showBackground = true)
 @Composable
-fun IconNamePreview() {
+private fun IconNamePreview() {
     MaterialTheme {
         Row(modifier = Modifier.fillMaxWidth()) {
             IconName(name = "Mic")

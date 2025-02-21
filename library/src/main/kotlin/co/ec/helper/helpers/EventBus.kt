@@ -1,4 +1,4 @@
-package co.ec.helper
+package co.ec.helper.helpers
 
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -7,7 +7,8 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlin.coroutines.coroutineContext
 
-object AppEventBus {
+object EventBus {
+
     private val _events = MutableSharedFlow<Any>()
     val events = _events.asSharedFlow()
 
