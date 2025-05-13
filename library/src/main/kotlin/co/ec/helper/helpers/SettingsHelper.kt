@@ -5,6 +5,7 @@ import android.content.SharedPreferences
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import androidx.core.content.edit
 
 open class SettingsHelper(context: Context, preferencesName: String = "AppSettings") {
 
@@ -38,7 +39,7 @@ open class SettingsHelper(context: Context, preferencesName: String = "AppSettin
 
     // Store String value
     open fun putString(key: String, value: String) {
-        sharedPreferences.edit().putString(key, value).apply()
+        sharedPreferences.edit(true) { putString(key, value) }
         publish(key, value)
     }
 
@@ -49,7 +50,7 @@ open class SettingsHelper(context: Context, preferencesName: String = "AppSettin
 
     // Store Int value
     open fun putInt(key: String, value: Int) {
-        sharedPreferences.edit().putInt(key, value).apply()
+        sharedPreferences.edit(true) { putInt(key, value) }
         publish(key, value)
     }
 
@@ -60,7 +61,7 @@ open class SettingsHelper(context: Context, preferencesName: String = "AppSettin
 
     // Store Boolean value
     open fun putBoolean(key: String, value: Boolean) {
-        sharedPreferences.edit().putBoolean(key, value).apply()
+        sharedPreferences.edit(true) { putBoolean(key, value) }
         publish(key, value)
     }
 
@@ -71,7 +72,7 @@ open class SettingsHelper(context: Context, preferencesName: String = "AppSettin
 
     // Store Float value
     open fun putFloat(key: String, value: Float) {
-        sharedPreferences.edit().putFloat(key, value).apply()
+        sharedPreferences.edit(true) { putFloat(key, value) }
         publish(key, value)
     }
 
@@ -82,7 +83,7 @@ open class SettingsHelper(context: Context, preferencesName: String = "AppSettin
 
     // Remove a setting
     open fun remove(key: String) {
-        sharedPreferences.edit().remove(key).apply()
+        sharedPreferences.edit(true) { remove(key) }
         publish(key, null)
     }
 
@@ -119,6 +120,6 @@ open class SettingsHelper(context: Context, preferencesName: String = "AppSettin
 
     // Clear all settings
     open fun clear() {
-        sharedPreferences.edit().clear().apply()
+        sharedPreferences.edit(true) { clear() }
     }
 }

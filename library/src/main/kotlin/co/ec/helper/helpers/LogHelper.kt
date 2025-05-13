@@ -1,8 +1,6 @@
 package co.ec.helper.helpers
 
 import android.util.Log
-import co.ec.helper.utils.dateString
-import co.ec.helper.utils.unix
 
 object LogHelper {
 
@@ -32,8 +30,7 @@ object LogHelper {
      */
     private fun appendToLog(customTag: String? = null, message: String) {
         if (!customTag.isNullOrEmpty()) {
-            var unix=unix().toString()
-            ExceptionHelper.appendLog("${unix}#$customTag#$message")
+            ExceptionHelper.log(message,customTag)
         }
     }
 
