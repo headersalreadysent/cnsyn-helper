@@ -32,7 +32,8 @@ object LogHelper {
      */
     private fun appendToLog(customTag: String? = null, message: String) {
         if (!customTag.isNullOrEmpty()) {
-            ExceptionHelper.appendLog("${unix().dateString()}#$customTag#$message")
+            var unix=unix().toString()
+            ExceptionHelper.appendLog("${unix}#$customTag#$message")
         }
     }
 
