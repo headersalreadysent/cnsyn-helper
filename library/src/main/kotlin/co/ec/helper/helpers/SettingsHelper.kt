@@ -39,7 +39,7 @@ open class SettingsHelper(context: Context, preferencesName: String = "AppSettin
 
     // Store String value
     open fun putString(key: String, value: String) {
-        sharedPreferences.edit(true) { putString(key, value) }
+        sharedPreferences.edit() { putString(key, value) }
         publish(key, value)
     }
 
@@ -50,7 +50,7 @@ open class SettingsHelper(context: Context, preferencesName: String = "AppSettin
 
     // Store Int value
     open fun putInt(key: String, value: Int) {
-        sharedPreferences.edit(true) { putInt(key, value) }
+        sharedPreferences.edit() { putInt(key, value) }
         publish(key, value)
     }
 
@@ -61,7 +61,7 @@ open class SettingsHelper(context: Context, preferencesName: String = "AppSettin
 
     // Store Boolean value
     open fun putBoolean(key: String, value: Boolean) {
-        sharedPreferences.edit(true) { putBoolean(key, value) }
+        sharedPreferences.edit() { putBoolean(key, value) }
         publish(key, value)
     }
 
@@ -72,7 +72,7 @@ open class SettingsHelper(context: Context, preferencesName: String = "AppSettin
 
     // Store Float value
     open fun putFloat(key: String, value: Float) {
-        sharedPreferences.edit(true) { putFloat(key, value) }
+        sharedPreferences.edit() { putFloat(key, value) }
         publish(key, value)
     }
 
@@ -83,7 +83,7 @@ open class SettingsHelper(context: Context, preferencesName: String = "AppSettin
 
     // Remove a setting
     open fun remove(key: String) {
-        sharedPreferences.edit(true) { remove(key) }
+        sharedPreferences.edit() { remove(key) }
         publish(key, null)
     }
 
