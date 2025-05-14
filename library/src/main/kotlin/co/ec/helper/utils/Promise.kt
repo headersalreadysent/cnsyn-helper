@@ -1,6 +1,9 @@
-package co.ec.helper.helpers
+package co.ec.helper.utils
 
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 class Promise<T>(executor: (resolve: (T) -> Unit, reject: (e:Throwable) -> Unit) -> Unit) {
     private val deferred = CompletableDeferred<T>()

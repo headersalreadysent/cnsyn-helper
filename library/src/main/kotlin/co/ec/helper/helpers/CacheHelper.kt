@@ -1,12 +1,13 @@
 package co.ec.helper.helpers
 
 import android.content.Context
+import co.ec.helper.helpers.EventBus.publish
 import co.ec.helper.utils.unix
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
-class CacheHelper(context: Context, val shareName: String = "cache") {
+open class CacheHelper(context: Context, val shareName: String = "cache") {
 
     //private cache object
     private val cache = SettingsHelper(context, shareName)
@@ -28,14 +29,20 @@ class CacheHelper(context: Context, val shareName: String = "cache") {
         instance = this
     }
 
-    fun put(name: String, value: String, time: Int = 86400) {
+    /**
+     * put string to cache
+     */
+    open fun put(name: String, value: String, time: Int = 86400) {
         val cacheString = (unix() + time).toString() + "||" + value
         cache.putString(name, cacheString)
         publish(name,value)
         LogHelper.i("$shareName put-cache: $name => $cacheString")
     }
 
-    fun get(name: String): String? {
+    /**
+     * get by cache
+     */
+    open fun get(name: String): String? {
         val value = cache.getString(name) ?: return null
         val values = value.split("||")
         val ttl = values[0].toLong() - unix()
@@ -49,7 +56,7 @@ class CacheHelper(context: Context, val shareName: String = "cache") {
     @OptIn(DelicateCoroutinesApi::class)
     private fun publish(key: String, value: Any?) {
         GlobalScope.launch {
-            EventBus.publish(CacheChange(key, value))
+            publish(CacheChange(key, value))
         }
     }
 }
