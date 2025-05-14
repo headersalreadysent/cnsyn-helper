@@ -55,8 +55,6 @@ class ExceptionHelper(private val context: Context) : Thread.UncaughtExceptionHa
         private const val CRASH_FILE = "crash_report_"
 
         val logDir = File(CnsynApp.context().filesDir, "crash")
-        val logFile = File(CnsynApp.context().filesDir, APP_LOG_FILE)
-        val writer = FileWriter(logFile, true)
 
         private fun getLogDirectory(): File {
             if (!logDir.exists()) {
@@ -73,7 +71,8 @@ class ExceptionHelper(private val context: Context) : Thread.UncaughtExceptionHa
          */
         fun log(message: String, tag: String = "") {
             try {
-                val logDir = getLogDirectory()
+                val logFile = File(CnsynApp.context().filesDir, APP_LOG_FILE)
+                val writer = FileWriter(logFile, true)
                 var unix = unix().toString()
                 writer.append("$unix#$message#$tag\n")
                 writer.flush()
@@ -88,7 +87,7 @@ class ExceptionHelper(private val context: Context) : Thread.UncaughtExceptionHa
          * read logs
          */
         fun readLogs(): List<LogItem> {
-            val logDir = getLogDirectory()
+            val logFile = File(CnsynApp.context().filesDir, APP_LOG_FILE)
             val maxFileSize = 1 * 1024 * 1024 // 1 MB
             if (!logFile.exists()) return emptyList()
             // Check if the file exceeds 1 MB and trim if necessary
@@ -109,6 +108,7 @@ class ExceptionHelper(private val context: Context) : Thread.UncaughtExceptionHa
          */
         private fun trimLogs() {
             try {
+                val logFile = File(CnsynApp.context().filesDir, APP_LOG_FILE)
                 val lines = logFile.readLines()
                 val halfSize = lines.size / 2
                 val remainingLines = lines.subList(halfSize, lines.size)
@@ -123,6 +123,7 @@ class ExceptionHelper(private val context: Context) : Thread.UncaughtExceptionHa
          * clear log file
          */
         fun clearLogs() {
+            val logFile = File(CnsynApp.context().filesDir, APP_LOG_FILE)
             logFile.writeText("")
         }
 
