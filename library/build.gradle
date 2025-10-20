@@ -7,8 +7,18 @@ plugins {
 
 }
 
+// Allow overriding the artifact version from the command line or environment.
+// Usage: ./gradlew :library:publish -PreleaseVersion=1.2.3
+// or set RELEASE_VERSION in the environment in CI.
+def defaultVersion = '1.0'
 group = 'co.ec.helper'
-version = '1.0'
+version = project.hasProperty('releaseVersion') ? project.property('releaseVersion') : (System.getenv('RELEASE_VERSION') ?: defaultVersion)
+
+// GitHub Packages configuration: prefers env vars set by GitHub Actions, then project properties, then a placeholder
+// When running locally, set `gpr.repo` (owner/repo), `gpr.user` and `gpr.key` in ~/.gradle/gradle.properties or replace OWNER/REPO below.
+def githubRepo = System.getenv('GITHUB_REPOSITORY') ?: project.findProperty('gpr.repo') ?: 'OWNER/REPO'
+def githubUser = System.getenv('GITHUB_ACTOR') ?: project.findProperty('gpr.user')
+def githubToken = System.getenv('GITHUB_TOKEN') ?: project.findProperty('gpr.key')
 
 android {
 
@@ -53,15 +63,49 @@ dependencies {
 afterEvaluate {
     publishing {
         repositories {
-            maven { url = uri("${System.getProperty("user.home")}/.gradle/localrepo") }
+            // Publish to GitHub Packages. In Actions, GITHUB_REPOSITORY has the form owner/repo.
+            maven {
+                name = "GitHubPackages"
+                url = uri("https://maven.pkg.github.com/${githubRepo}")
+                credentials {
+                    username = githubUser
+                    password = githubToken
+                }
+            }
         }
         publications {
-            // Creates a Maven publication called "release".
+            // Creates a Maven publication called "release" from the Android component.
             release(MavenPublication) {
                 from components.release
-                groupId = 'com.github.headersalreadysent'
+                // Use project coordinates so they are easy to manage in one place
+                groupId = project.group
                 artifactId = 'cnsyn-helper'
-                version = '1.0.1'
+                version = project.version
+
+                // Minimal POM metadata (helps with package discoverability)
+                pom {
+                    name = 'cnsyn-helper'
+                    description = 'A small Android Compose helper library.'
+                    url = "https://github.com/${githubRepo}"
+                    licenses {
+                        license {
+                            name = 'The MIT License'
+                            url = 'https://opensource.org/licenses/MIT'
+                        }
+                    }
+                    developers {
+                        developer {
+                            id = 'can'
+                            name = 'Can'
+                            email = 'you@example.com'
+                        }
+                    }
+                    scm {
+                        connection = "scm:git:git://github.com/${githubRepo}.git"
+                        developerConnection = "scm:git:ssh://github.com/${githubRepo}.git"
+                        url = "https://github.com/${githubRepo}"
+                    }
+                }
             }
         }
     }

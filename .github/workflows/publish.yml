@@ -1,0 +1,30 @@
+name: Publish to GitHub Packages
+
+on:
+  push:
+    branches:
+      - 'master'
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: gradle/wrapper-validation-action@v1
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+      - name: Publish library to GitHub Packages
+        env:
+          # Actions provides GITHUB_TOKEN automatically; it's used by the Gradle publishing credentials in the module
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: ./gradlew :library:publish --no-daemon
