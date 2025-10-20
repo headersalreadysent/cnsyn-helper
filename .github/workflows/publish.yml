@@ -23,8 +23,24 @@ jobs:
         with:
           distribution: temurin
           java-version: 17
+      - name: Determine release version
+        id: version
+        run: |
+          echo "GITHUB_REF=${GITHUB_REF}"
+          if [[ "${GITHUB_REF}" == refs/tags/* ]]; then
+            TAG=${GITHUB_REF#refs/tags/}
+            # strip leading 'v' if present
+            VERSION=${TAG#v}
+          else
+            # use a monotonically increasing version based on workflow run number for master pushes
+            VERSION="0.0.${GITHUB_RUN_NUMBER}"
+          fi
+          echo "RELEASE_VERSION=${VERSION}"
+          echo "RELEASE_VERSION=${VERSION}" >> $GITHUB_ENV
       - name: Publish library to GitHub Packages
         env:
           # Actions provides GITHUB_TOKEN automatically; it's used by the Gradle publishing credentials in the module
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: ./gradlew :library:publish --no-daemon
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          RELEASE_VERSION: ${{ env.RELEASE_VERSION }}
+        run: ./gradlew :library:publish -PreleaseVersion=${RELEASE_VERSION} --no-daemon
